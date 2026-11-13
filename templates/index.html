@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero">
+  <p class="eyebrow">LOCAL SHOPPING · SMART PICKUP</p>
+  <h1>Shop nearby.<br><span>Skip the queue.</span></h1>
+  <p>Discover local shops, order products in advance and collect them when they are packed.</p>
+  <div class="actions"><a class="btn" href="{{ url_for('register') }}">Get started</a><a class="btn secondary" href="{{ url_for('login') }}">Login</a></div>
+</section>
+<section class="features">
+  <article><h3>📍 Find nearby shops</h3><p>Use your location and preferred search radius.</p></article>
+  <article><h3>🛍️ Order in advance</h3><p>Browse products and place your order online.</p></article>
+  <article><h3>📦 Quick pickup</h3><p>Collect your order after the shop marks it packed.</p></article>
+</section>
+{% endblock %}

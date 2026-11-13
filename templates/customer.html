@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Customer dashboard · Quick Cart{% endblock %}
+{% block content %}
+<h1>Customer dashboard</h1>
+<section class="panel">
+  <h2>Find shops near you</h2>
+  <p>Allow location access, select a radius and find registered shops that have saved their location.</p>
+  <div class="inline-controls">
+    <label>Search radius</label><select id="radius"><option value="2">2 km</option><option value="5" selected>5 km</option><option value="10">10 km</option><option value="20">20 km</option></select>
+    <button class="btn" onclick="findShops()">Use my location</button>
+  </div>
+  <p id="location-message" class="muted"></p><div id="nearby-results"></div>
+</section>
+<section class="panel">
+  <h2>All registered shops</h2>
+  <p class="muted">Shops appear here even if they have not yet saved GPS coordinates.</p>
+  {% for shop in shops %}
+  <div class="shop-row"><div><strong>{{ shop.shop_name or shop.name }}</strong><br><small>{{ shop.name }}</small></div><a class="btn small" href="{{ url_for('shop_products',shop_id=shop.id) }}">View products</a></div>
+  {% else %}<p>No shops registered yet.</p>{% endfor %}
+</section>
+<section class="panel">
+  <h2>My orders</h2>
+  {% for order in orders %}
+  <div class="shop-row"><div><strong>Order #{{ order.id }}</strong><br><small>{{ order.shop_name }} · ₹{{ '%.2f'|format(order.total) }} · {{ order.status }}</small></div><a href="{{ url_for('order_detail',order_id=order.id) }}">Details</a></div>
+  {% else %}<p>You have not placed any orders.</p>{% endfor %}
+</section>
+<script>
+async function findShops(){
+ const msg=document.getElementById('location-message'), out=document.getElementById('nearby-results');
+ out.innerHTML=''; msg.textContent='Getting your location...';
+ if(!navigator.geolocation){msg.textContent='Geolocation is not supported by this browser.';return;}
+ navigator.geolocation.getCurrentPosition(async pos=>{
+  try{
+   const res=await fetch('{{ url_for("nearby_shops") }}',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({latitude:pos.coords.latitude,longitude:pos.coords.longitude,radius:document.getElementById('radius').value})});
+   const data=await res.json(); if(!res.ok) throw new Error(data.error||'Location search failed');
+   msg.textContent=data.length+' shop(s) found within selected radius.';
+   if(!data.length){out.textContent='No shops found in this radius. Try a larger radius.';return;}
+   data.forEach(s=>{const div=document.createElement('div');div.className='shop-row';const info=document.createElement('span');info.textContent=(s.shop_name||s.name)+' · '+s.distance_km+' km away';const a=document.createElement('a');a.className='btn small';a.href='/shop/'+s.id+'/products';a.textContent='View products';div.append(info,a);out.append(div);});
+  }catch(e){msg.textContent=e.message;}
+ },()=>{msg.textContent='Location permission was denied or location is unavailable. You can still browse all registered shops.';});
+}
+</script>
+{% endblock %}

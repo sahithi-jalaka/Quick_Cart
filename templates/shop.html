@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Shop dashboard · Quick Cart{% endblock %}
+{% block content %}
+<h1>Shop owner dashboard</h1>
+<section class="panel">
+<h2>Set your shop GPS location</h2>
+<p class="muted">Allow location access while you are at your shop. This location is used for nearby-shop search.</p>
+<button class="btn" onclick="saveLocation()">Save my current location</button><span id="gps-message" class="muted"></span>
+</section>
+<section class="panel"><h2>Add a product</h2>
+<form method="post" action="{{ url_for('add_product') }}" class="product-form">
+<input name="name" placeholder="Product name" required>
+<input name="description" placeholder="Description">
+<input name="price" type="number" min="0.01" step="0.01" placeholder="Price (₹)" required>
+<input name="stock" type="number" min="0" placeholder="Stock quantity" required>
+<button class="btn" type="submit">Add product</button>
+</form></section>
+<section class="panel"><h2>Your products</h2>
+{% for p in products %}
+<div class="shop-row"><div><strong>{{ p.name }}</strong><br><small>₹{{ '%.2f'|format(p.price) }} · Stock: {{ p.stock }}</small></div>
+<form method="post" action="{{ url_for('delete_product',product_id=p.id) }}"><button class="btn danger small">Delete</button></form></div>
+{% else %}<p>No products added yet.</p>{% endfor %}
+</section>
+<section class="panel"><h2>Customer orders</h2>
+{% for o in orders %}
+<div class="order-card"><div><strong>Order #{{ o.id }} · {{ o.customer_name }}</strong><p>₹{{ '%.2f'|format(o.total) }} · {{ o.status }} · {{ o.created_at }}</p></div>
+<div class="actions">
+{% if o.status=='Pending' %}
+<form method="post" action="{{ url_for('update_order',order_id=o.id,action='confirm') }}"><button class="btn small">Confirm</button></form>
+<form method="post" action="{{ url_for('update_order',order_id=o.id,action='reject') }}"><button class="btn danger small">Reject</button></form>
+{% elif o.status=='Confirmed' %}
+<form method="post" action="{{ url_for('update_order',order_id=o.id,action='pack') }}"><button class="btn small">Mark packed</button></form>
+{% endif %}
+</div></div>
+{% else %}<p>No orders received yet.</p>{% endfor %}
+</section>
+<script>
+function saveLocation(){
+ const msg=document.getElementById('gps-message');msg.textContent=' Getting location...';
+ if(!navigator.geolocation){msg.textContent=' Geolocation unavailable.';return;}
+ navigator.geolocation.getCurrentPosition(async p=>{
+  const r=await fetch('{{ url_for("save_shop_location") }}',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({latitude:p.coords.latitude,longitude:p.coords.longitude})});
+  const d=await r.json();msg.textContent=r.ok?' '+d.message:' '+(d.error||'Could not save location');
+ },()=>msg.textContent=' Location permission denied or unavailable.');
+}
+</script>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Register · Quick Cart{% endblock %}
+{% block content %}
+<div class="form-card"><h2>Create account</h2>
+<form method="post">
+  <label>Full name</label><input name="name" required>
+  <label>Email</label><input type="email" name="email" required>
+  <label>Password (minimum 6 characters)</label><input type="password" name="password" minlength="6" required>
+  <label>Account type</label>
+  <select name="role" id="role" onchange="toggleShop()" required><option value="customer">Customer</option><option value="shop">Shop owner</option></select>
+  <div id="shop-field" hidden><label>Shop name</label><input name="shop_name"></div>
+  <button class="btn" type="submit">Register</button>
+</form><p>Already registered? <a href="{{ url_for('login') }}">Login</a></p></div>
+<script>
+function toggleShop(){document.getElementById('shop-field').hidden=document.getElementById('role').value!=='shop';}
+</script>
+{% endblock %}

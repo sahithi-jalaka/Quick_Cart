@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Order details · Quick Cart{% endblock %}
+{% block content %}
+<h1>Order #{{ order.id }}</h1>
+<section class="panel"><p><strong>Shop:</strong> {{ order.shop_name }}</p><p><strong>Status:</strong> <span class="status">{{ order.status }}</span></p><p><strong>Total:</strong> ₹{{ '%.2f'|format(order.total) }}</p>
+<h2>Items</h2>
+{% for item in items %}<div class="shop-row"><span>{{ item.name }} × {{ item.quantity }}</span><span>₹{{ '%.2f'|format(item.unit_price * item.quantity) }}</span></div>{% endfor %}
+<p class="muted">Visit the shop only after the status changes to Packed.</p>
+<a class="btn secondary" href="{{ url_for('customer_dashboard') }}">Back to dashboard</a>
+</section>
+{% endblock %}

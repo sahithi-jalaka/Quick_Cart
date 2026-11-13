@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Products · Quick Cart{% endblock %}
+{% block content %}
+<h1>{{ shop.shop_name or shop.name }}</h1><p>Choose quantities and place your order.</p>
+<form method="post" action="{{ url_for('place_order') }}">
+<input type="hidden" name="shop_id" value="{{ shop.id }}">
+<div class="panel">
+{% for p in products %}
+<div class="product-row">
+<div><strong>{{ p.name }}</strong><p class="muted">{{ p.description or '' }} · ₹{{ '%.2f'|format(p.price) }} · Available: {{ p.stock }}</p></div>
+<input type="hidden" name="product_id" value="{{ p.id }}">
+<input type="number" name="quantity" min="0" max="{{ p.stock }}" value="0" aria-label="Quantity for {{ p.name }}">
+</div>
+{% else %}<p>This shop has no products in stock.</p>{% endfor %}
+<button class="btn" type="submit">Place order</button>
+</div></form>
+{% endblock %}
